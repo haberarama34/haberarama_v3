@@ -232,16 +232,40 @@ Kurallar: "OLUMLU_ADAY" yalnızca haber hedef firmayla ilgili VE somut olumsuz o
     return {"ilgili_firma": False, "olumsuz_olay": False, "olay_turu": "belirsiz", "sinif": "API_HATASI", "guven": 0.0, "gerekce": last_error or "Hata", "model": "", "hata": last_error or "Hata"}
 
 # -------- 4. ANA İŞ AKIŞI VE TARAMA --------
+def excel_hucre_cozumle(hucre_verisi):
+    """Excel hücresindeki veriyi (JSON veya virgülle ayrılmış metin) güvenle listeye çevirir."""
+    if pd.isna(hucre_verisi) or str(hucre_verisi).strip() == "":
+        return []
+    
+    veri_metni = str(hucre_verisi).strip()
+    # Eğer daha önceki gibi JSON formatında yazılmışsa [ "isim1", "isim2" ]
+    if veri_metni.startswith("["):
+        try:
+            return json.loads(veri_metni)
+        except json.JSONDecodeError:
+            pass
+    
+    # Normal virgülle ayrılmış metin olarak yazılmışsa (Örn: THY, Türk Hava Yolları)
+    return [isim.strip() for isim in veri_metni.split(",") if isim.strip()]
+
 try:
     df_excel = pd.read_excel(EXCEL_DOSYASI)
     firmalar = []
     for _, row in df_excel.iterrows():
+        haber_unvan_str = str(row['haber_unvan']).strip()
+        
+        # Alternatif unvanlar sütunu varsa ve doluysa al, yoksa sadece haber_unvan'ı kullan
+        alt_unvanlar = excel_hucre_cozumle(row.get('alternatif_unvanlar'))
+        if not alt_unvanlar:
+            alt_unvanlar = [haber_unvan_str]
+            
         firmalar.append({
             "firma_unvan": str(row['firma_unvan']).strip(),
-            "haber_unvan": str(row['haber_unvan']).strip(),
-            "alternatif_unvanlar": json.loads(row['alternatif_unvanlar']) if 'alternatif_unvanlar' in row and pd.notna(row['alternatif_unvanlar']) else [str(row['haber_unvan']).strip()],
-            "ozel_negatifler": json.loads(row['ozel_negatifler']) if 'ozel_negatifler' in row and pd.notna(row['ozel_negatifler']) else []
+            "haber_unvan": haber_unvan_str,
+            "alternatif_unvanlar": alt_unvanlar,
+            "ozel_negatifler": excel_hucre_cozumle(row.get('ozel_negatifler'))
         })
+    print(f"Excel'den {len(firmalar)} firma başarıyla okundu.")
 except Exception as e:
     print(f"Excel okunurken hata oluştu: {e}")
     exit(1)
