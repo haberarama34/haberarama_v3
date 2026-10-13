@@ -389,6 +389,7 @@ try:
     # Port 587 kullanılarak bağlantı başlatılıyor (30 saniye zaman aşımı sınırı ile)
     server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
     server.ehlo() # Sunucuya merhaba de
+    server.set_debuglevel(1)
     server.starttls(context=context) # Güvenli TLS tüneline geç
     server.ehlo() # Tünel içinden tekrar merhaba de
     
