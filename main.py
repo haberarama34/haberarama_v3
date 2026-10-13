@@ -38,17 +38,17 @@ if not all([GEMINI_API_KEY, SUPABASE_URL, GONDEREN_MAIL, GONDEREN_SIFRE]):
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-GEMINI_MODEL_ISTENEN = "gemini-3.1-flash-lite"
+GEMINI_MODEL_ISTENEN = "gemini-3.5-flash-lite"
 GEMINI_MODEL_YEDEK =   "gemini-3.5-flash-lite"
 MODEL_YEDEK_KULLAN = True
 
 MAX_HABER_FIRMA = 8
-MAX_GEMINI_CAGRISI = 20
+MAX_GEMINI_CAGRISI = 450
 BEKLEME_RSS_SANIYE = 1.5
-BEKLEME_SAYFA_SANIYE = 0.4
+BEKLEME_SAYFA_SANIYE = 4.5
 HABER_GOVDESI_INDIR = True
 GOVDE_MAX_KARAKTER = 9000
-RSS_ACIKLAMA_MAX_KARAKTER = 1800
+RSS_ACIKLAMA_MAX_KARAKTER = 5000
 EXCEL_DOSYASI = "Firmalar.xlsx"
 
 # -------- 2. KELİME LİSTELERİ VE YARDIMCI FONKSİYONLAR --------
@@ -307,7 +307,7 @@ for idx, firma in enumerate(firmalar, start=1):
         elif should_call and gemini_cagrisi_sayisi < MAX_GEMINI_CAGRISI:
             gemini = gemini_degerlendir(firma, haber, GEMINI_MODEL_ISTENEN, GEMINI_MODEL_YEDEK, MODEL_YEDEK_KULLAN)
             gemini_cagrisi_sayisi += 1; gemini["cache"] = False
-            time.sleep(0.4)
+            time.sleep(4.5)
         elif should_call:
             gemini.update({"sinif": "GEMINI_LIMITI", "gerekce": "Limit aşıldı."})
 
