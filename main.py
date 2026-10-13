@@ -24,7 +24,7 @@ if not all([GEMINI_API_KEY, SUPABASE_URL, GONDEREN_MAIL, GONDEREN_SIFRE]):
     sys.exit(1)
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-3.5-flash-latest')
+model = genai.GenerativeModel('gemini-3.5-flash-lite')
 
 ANAHTAR_KELIMELER = ["konkordato", "iflas", "dava", "haciz", "grev", "ceza", "zarar", "temerrüt"]
 NEGATIF_KELIMELER = {"Genel": ["bedava", "promosyon", "reklam", "sponsor", "indirim", "dizi"]}
