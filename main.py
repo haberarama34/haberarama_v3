@@ -18,7 +18,7 @@ GONDEREN_SIFRE = os.environ.get("GONDEREN_SIFRE")
 ALICI_MAILLER = ["muratfirar@hotmail.com","muratfirar@isleasing.com.tr"] # Raporun gideceği mail adres(ler)ini buraya yaz
 
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash-latest')
+model = genai.GenerativeModel('gemini-3.5-flash-latest')
 
 ANAHTAR_KELIMELER = ["konkordato", "iflas", "dava", "haciz", "grev", "ceza", "zarar", "temerrüt"]
 NEGATIF_KELIMELER = {"Genel": ["bedava", "promosyon", "reklam", "sponsor", "indirim", "dizi"]}
