@@ -27,7 +27,7 @@ import psycopg2
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 GONDEREN_MAIL = os.environ.get("GONDEREN_MAIL")
-GONDEREN_SIFRE = os.environ.get("GONDEREN_SIFRE")
+GONDEREN_SIFRE = os.environ.get("GMAIL_APP_PASSWORD")
 
 # E-postanın gideceği 2 adresi buraya tanımlayın
 ALICI_MAILLER = ["muratfirar@hotmail.com.tr", "muratfirar@isleasing.com.tr"]
