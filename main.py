@@ -1,3 +1,6 @@
+import smtplib
+import ssl # Bu satırı ekleyin
+from email.mime.multipart import MIMEMultipart
 import os
 import re
 import json
@@ -380,7 +383,15 @@ else:
 msg.attach(MIMEText(html_icerik, "html"))
 
 try:
-    server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+    # Güvenlik bağlamı oluşturuluyor
+    context = ssl.create_default_context()
+    
+    # Port 587 kullanılarak bağlantı başlatılıyor (30 saniye zaman aşımı sınırı ile)
+    server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
+    server.ehlo() # Sunucuya merhaba de
+    server.starttls(context=context) # Güvenli TLS tüneline geç
+    server.ehlo() # Tünel içinden tekrar merhaba de
+    
     server.login(GONDEREN_MAIL, GONDEREN_SIFRE)
     server.sendmail(GONDEREN_MAIL, ALICI_MAILLER, msg.as_string())
     server.quit()
