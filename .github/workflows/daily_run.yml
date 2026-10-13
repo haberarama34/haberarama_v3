@@ -31,4 +31,5 @@ jobs:
           GONDEREN_MAIL: ${{ secrets.GONDEREN_MAIL }}
           GONDEREN_SIFRE: ${{ secrets.GONDEREN_SIFRE }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALICI_MAILLER : ${{secrets.ALICI_MAILLER}}
         run: python main.py
