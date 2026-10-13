@@ -35,7 +35,7 @@ if not all([GEMINI_API_KEY, SUPABASE_URL, GONDEREN_MAIL, GONDEREN_SIFRE]):
 
 client = genai.Client(api_key=GEMINI_API_KEY)
 
-GEMINI_MODEL_ISTENEN = "gemini-3.5-flash-lite"
+GEMINI_MODEL_ISTENEN = "gemini-3.1-flash-lite"
 GEMINI_MODEL_YEDEK =   "gemini-3.5-flash-lite"
 MODEL_YEDEK_KULLAN = True
 
