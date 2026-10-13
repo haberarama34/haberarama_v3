@@ -1,0 +1,31 @@
+name: Gunluk Haber Taramasi Pipeline
+
+on:
+  schedule:
+    # Türkiye Saati (TSİ) 07:00 için UTC saati 04:00 olarak ayarlanır[cite: 1]
+    - cron: '0 4 * * *'
+  workflow_dispatch: # İstediğin zaman manuel de çalıştırabilmen için
+
+jobs:
+  tarama:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Depoyu Klonla
+        uses: actions/checkout@v3
+
+      - name: Python Kurulumu
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Kütüphaneleri Kur
+        run: |
+          pip install feedparser pandas openpyxl google-generativeai psycopg2-binary
+
+      - name: Botu Calistir
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          GONDEREN_MAIL: ${{ secrets.GONDEREN_MAIL }}
+          GONDEREN_SIFRE: ${{ secrets.GONDEREN_SIFRE }}
+        run: python main.py
