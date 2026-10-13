@@ -375,7 +375,7 @@ aday_haberler = [r for r in tum_sonuclar if r["nihai_durum"] == "GEMINI_ADAY_INC
 msg = MIMEMultipart("alternative")
 msg["From"] = GONDEREN_MAIL
 #msg["To"] = ", ".join(ALICI_MAILLER)
-msg["To"] = "undisclosed-recipients
+msg["To"] = "undisclosed-recipients:;"
 
 if aday_haberler:
     df_rapor = pd.DataFrame(aday_haberler)[["firma_unvan", "baslik", "tarih", "risk_kelimeleri", "gemini_gerekce", "url"]]
