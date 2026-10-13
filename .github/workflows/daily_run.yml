@@ -30,4 +30,5 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           GONDEREN_MAIL: ${{ secrets.GONDEREN_MAIL }}
           GONDEREN_SIFRE: ${{ secrets.GONDEREN_SIFRE }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
         run: python main.py
