@@ -30,7 +30,14 @@ GONDEREN_MAIL = os.environ.get("GONDEREN_MAIL")
 GONDEREN_SIFRE = os.environ.get("GMAIL_APP_PASSWORD")
 
 # E-postanın gideceği 2 adresi buraya tanımlayın
-ALICI_MAILLER = ["muratfirar@hotmail.com.tr", "muratfirar@isleasing.com.tr"]
+ALICI_MAILLER_STR = os.environ.get("ALICI_MAILLER", "") 
+ALICI_MAILLER = [m.strip() for m in ALICI_MAILLER_STR.split(",") if m.strip()]
+
+if not ALICI_MAILLER:
+    print("KRİTİK HATA: ALICI_MAILLER çevre değişkeni bulunamadı!")
+    exit(1)
+
+#ALICI_MAILLER = ["muratfirar@hotmail.com.tr", "muratfirar@isleasing.com.tr"]
 
 if not all([GEMINI_API_KEY, SUPABASE_URL, GONDEREN_MAIL, GONDEREN_SIFRE]):
     print("HATA: Çevre değişkenleri (Secrets) eksik!")
@@ -39,7 +46,7 @@ if not all([GEMINI_API_KEY, SUPABASE_URL, GONDEREN_MAIL, GONDEREN_SIFRE]):
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 GEMINI_MODEL_ISTENEN = "gemini-3.5-flash-lite"
-GEMINI_MODEL_YEDEK =   "gemini-3.5-flash-lite"
+GEMINI_MODEL_YEDEK =   "gemini-3.1-flash-lite"
 MODEL_YEDEK_KULLAN = True
 
 MAX_HABER_FIRMA = 8
@@ -367,7 +374,8 @@ aday_haberler = [r for r in tum_sonuclar if r["nihai_durum"] == "GEMINI_ADAY_INC
 
 msg = MIMEMultipart("alternative")
 msg["From"] = GONDEREN_MAIL
-msg["To"] = ", ".join(ALICI_MAILLER)
+#msg["To"] = ", ".join(ALICI_MAILLER)
+msg["To"] = "undisclosed-recipients
 
 if aday_haberler:
     df_rapor = pd.DataFrame(aday_haberler)[["firma_unvan", "baslik", "tarih", "risk_kelimeleri", "gemini_gerekce", "url"]]
