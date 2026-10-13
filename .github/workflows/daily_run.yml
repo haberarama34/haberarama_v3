@@ -2,24 +2,25 @@ name: Gunluk Haber Taramasi Pipeline
 
 on:
   schedule:
-    # Türkiye Saati (TSİ) 07:00 için UTC saati 04:00 olarak ayarlanır[cite: 1]
+    # Türkiye Saati (TSİ) 07:00 için UTC saati 04:00 olarak ayarlanır
     - cron: '0 4 * * *'
-  workflow_dispatch: # İstediğin zaman manuel de çalıştırabilmen için
+  workflow_dispatch:
 
 jobs:
   tarama:
     runs-on: ubuntu-latest
     steps:
       - name: Depoyu Klonla
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Python Kurulumu
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Kütüphaneleri Kur
         run: |
+          python -m pip install --upgrade pip
           pip install feedparser pandas openpyxl google-generativeai psycopg2-binary
 
       - name: Botu Calistir
