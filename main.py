@@ -9,13 +9,19 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import google.generativeai as genai
 import psycopg2 
+import sys
 
 # --- 1. AYARLAR VE ÇEVRE DEĞİŞKENLERİ ---
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 SUPABASE_URL = os.environ.get("SUPABASE_URL") 
 GONDEREN_MAIL = os.environ.get("GONDEREN_MAIL")
 GONDEREN_SIFRE = os.environ.get("GONDEREN_SIFRE")
-ALICI_MAILLER = ["muratfirar@hotmail.com","muratfirar@isleasing.com.tr"] # Raporun gideceği mail adres(ler)ini buraya yaz
+ALICI_MAILLER = ["muratfirar@hotmail.com.tr", "muratfirar@isleasing.com.tr"] # Raporun gideceği mail adresini buraya yaz
+
+# Eksik Secret kontrolü
+if not all([GEMINI_API_KEY, SUPABASE_URL, GONDEREN_MAIL, GONDEREN_SIFRE]):
+    print("KRİTİK HATA: GitHub Secrets (Şifreler) eksik veya okunmuyor!")
+    sys.exit(1)
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-3.5-flash-latest')
@@ -27,37 +33,41 @@ def tr_lower(text):
     if not isinstance(text, str): return ""
     return text.replace("&quot;", '"').replace("&#39;", "'").replace("&nbsp;", " ").replace("İ", "i").replace("I", "ı").lower()
 
-# --- 2. SUPABASE (POSTGRESQL) BAĞLANTISI VE TABLO ---
-conn = psycopg2.connect(SUPABASE_URL)
-cursor = conn.cursor()
+# --- 2. SUPABASE BAĞLANTISI ---
+try:
+    conn = psycopg2.connect(SUPABASE_URL)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS risk_haberleri (
+            id SERIAL PRIMARY KEY,
+            firma TEXT, kaynak TEXT, tarih TEXT, baslik TEXT, link TEXT UNIQUE, llm_ozet TEXT
+        )
+    ''')
+    conn.commit()
+    print("Veritabanı bağlantısı başarılı.")
+except Exception as e:
+    print(f"KRİTİK HATA: Supabase bağlantısı kurulamadı. URL'yi kontrol edin. Detay: {e}")
+    sys.exit(1)
 
-# PostgreSQL formatında tablo oluşturma (SQLite'dan farklı olarak SERIAL kullanılır)
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS risk_haberleri (
-        id SERIAL PRIMARY KEY,
-        firma TEXT, 
-        kaynak TEXT, 
-        tarih TEXT, 
-        baslik TEXT, 
-        link TEXT UNIQUE, 
-        llm_ozet TEXT
-    )
-''')
-conn.commit()
-
-# --- 3. EXCEL OKUMA VE HABER TARAMA ---
+# --- 3. EXCEL OKUMA ---
 try:
     df_firmalar = pd.read_excel('firmalar.xlsx')
+    print(f"Excel'den {len(df_firmalar)} satır başarıyla okundu.")
 except Exception as e:
-    print(f"Excel hatası: {e}")
-    exit()
+    print(f"KRİTİK HATA: firmalar.xlsx dosyası okunamadı. Depoda yüklü olduğundan emin olun. Detay: {e}")
+    sys.exit(1)
 
 raporlanacak_haberler = []
-toplam_firma = len(df_firmalar)
 
+# --- 4. HABER TARAMA ---
 for index, row in df_firmalar.iterrows():
-    firma_tam_ad = str(row['firma_unvan']).strip()
-    haber_unvan = str(row['haber_unvan']).strip()
+    # Excel sütun adlarınıza dikkat edin. Burada 'firma_unvan' ve 'haber_unvan' aranmaktadır.
+    try:
+        firma_tam_ad = str(row['firma_unvan']).strip()
+        haber_unvan = str(row['haber_unvan']).strip()
+    except KeyError as e:
+        print(f"KRİTİK HATA: Excel'de gerekli sütun bulunamadı. Lütfen sütun adlarının 'firma_unvan' ve 'haber_unvan' olduğundan emin olun. Detay: {e}")
+        sys.exit(1)
     
     keyword_query = " OR ".join(ANAHTAR_KELIMELER)
     sorgu = f'"{haber_unvan}" AND ({keyword_query})'
@@ -75,19 +85,16 @@ for index, row in df_firmalar.iterrows():
             kaynak_adi = entry.source.title if hasattr(entry, 'source') else "Google News"
             baslik_lower = tr_lower(baslik)
             
-            # Negatif Kelime Filtresi
             if any(negatif in baslik_lower for negatif in firma_negatifleri):
                 continue
                 
             eslesenler = [kw for kw in ANAHTAR_KELIMELER if re.search(rf"(?:^|\W){kw}", baslik_lower)]
             
             if eslesenler:
-                # LLM'e göndermeden hemen önce Supabase'de link kontrolü (Maliyet tasarrufu)
                 cursor.execute("SELECT id FROM risk_haberleri WHERE link=%s", (link,))
                 if cursor.fetchone() is not None:
-                    continue # Haber Supabase'de var, pas geç
+                    continue 
                 
-                # Sadece yeni haberler Gemini'a gider
                 prompt = f"""
                 Sen bir kurumsal kredi risk analistisin. 
                 Aşağıdaki haber metni '{firma_tam_ad}' ile doğrudan ilgili mi ve finansal/hukuki bir risk içeriyor mu? 
@@ -95,12 +102,11 @@ for index, row in df_firmalar.iterrows():
                 Haber: {baslik}
                 """
                 try:
-                    response = model.generate_content(prompt)
-                    llm_yaniti = response.text.strip()
+                    llm_yaniti = model.generate_content(prompt).text.strip()
                 except Exception as e:
+                    print(f"Gemini API Hatası: {e}")
                     llm_yaniti = "RED"
                 
-                # PostgreSQL formatında veritabanına kayıt (ON CONFLICT DO NOTHING)[cite: 1]
                 cursor.execute('''
                     INSERT INTO risk_haberleri (firma, kaynak, tarih, baslik, link, llm_ozet)
                     VALUES (%s, %s, %s, %s, %s, %s)
@@ -108,27 +114,23 @@ for index, row in df_firmalar.iterrows():
                 ''', (firma_tam_ad, kaynak_adi, yayim_tarihi, baslik, link, llm_yaniti))
                 conn.commit()
                 
-                # E-posta listesine sadece "RED" olmayanları ekle[cite: 1]
                 if "RED" not in llm_yaniti.upper():
                     raporlanacak_haberler.append({
                         "Firma": firma_tam_ad, "Başlık": baslik, "Özet": llm_yaniti, "Bağlantı": link
                     })
                     
     except Exception as e:
-        print(f"[{haber_unvan}] Hata: {e}")
+        print(f"[{haber_unvan}] RSS Tarama Hatası: {e}")
         
-    time.sleep(2) # Google Rate-Limit Koruması
+    time.sleep(2)
 
 cursor.close()
 conn.close()
 
-# --- 4. MAİL GÖNDERİMİ ---
+# --- 5. MAİL GÖNDERİMİ ---
 if raporlanacak_haberler:
     df_sonuclar = pd.DataFrame(raporlanacak_haberler)
-    def make_clickable(val):
-        return f'<a href="{val}">Haberi Oku</a>'
-    
-    html_tablo = df_sonuclar.to_html(escape=False, index=False, formatters={'Bağlantı': make_clickable})
+    html_tablo = df_sonuclar.to_html(escape=False, index=False, formatters={'Bağlantı': lambda val: f'<a href="{val}">Haberi Oku</a>'})
     html_mail_icerik = f"<h2>Günlük Risk Raporu</h2>{html_tablo}"
     
     try:
@@ -144,6 +146,7 @@ if raporlanacak_haberler:
         server.quit()
         print("Mail başarıyla gönderildi!")
     except Exception as e:
-        print(f"Mail hatası: {e}")
+        print(f"KRİTİK HATA: Mail gönderilemedi. Şifre veya portları kontrol edin. Detay: {e}")
+        sys.exit(1)
 else:
     print("Yeni risk haberi bulunamadı, mail atılmadı.")
