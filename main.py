@@ -383,9 +383,7 @@ else:
 msg.attach(MIMEText(html_icerik, "html"))
 
 try:
-    # Güvenlik bağlamı oluşturuluyor
-    context = ssl.create_default_context()
-    
+   
     # Port 587 kullanılarak bağlantı başlatılıyor (30 saniye zaman aşımı sınırı ile)
     server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
     server.ehlo() # Sunucuya merhaba de
