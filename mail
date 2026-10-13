@@ -1,0 +1,39 @@
+import smtplib
+from email.message import EmailMessage
+
+# 1. Mail İçeriğini Hazırla
+msg = EmailMessage()
+msg.set_content("Bağlantı testi başarılı, mail iletildi.")
+msg['Subject'] = "SMTP Bağlantı Testi"
+msg['From'] = "haberarama34@gmail.com"  # Kendi mail adresin
+msg['To'] = "muratfirar@hotmail.com.tr"       # Göndermek istediğin adres
+
+# 2. SMTP Ayarları (Gmail için Port 587 ve STARTTLS)
+smtp_server = "smtp.gmail.com"
+smtp_port = 587
+email_user = "haberarama34@gmail.com"
+email_pass = "dkqq vqsn fepb pfry"  # Gmail 'Uygulama Şifresi' (App Password) kullanılmalıdır
+
+try:
+    print("Sunucuya bağlanılıyor...")
+    # Port 587 için normal SMTP sınıfı kullanılır, SMTP_SSL KULLANILMAZ.
+    server = smtplib.SMTP(smtp_server, smtp_port, timeout=10)
+    
+    # Hata ayıklama modunu açar (Konsola detaylı log basar)
+    server.set_debuglevel(1) 
+    
+    server.ehlo()
+    server.starttls() # Bağlantıyı güvenli hale getir
+    server.ehlo()
+    
+    print("Giriş yapılıyor...")
+    server.login(email_user, email_pass)
+    
+    print("Mail gönderiliyor...")
+    server.send_message(msg)
+    
+    server.quit()
+    print("✅ Mail başarıyla gönderildi!")
+
+except Exception as e:
+    print(f"❌ Hata oluştu: {e}")
