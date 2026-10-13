@@ -15,7 +15,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 SUPABASE_URL = os.environ.get("SUPABASE_URL") 
 GONDEREN_MAIL = os.environ.get("GONDEREN_MAIL")
 GONDEREN_SIFRE = os.environ.get("GONDEREN_SIFRE")
-ALICI_MAILLER = ["kendi_mailin@ornek.com"] # Raporun gideceği mail adres(ler)ini buraya yaz
+ALICI_MAILLER = ["muratfirar@hotmail.com","muratfirar@isleasing.com.tr"] # Raporun gideceği mail adres(ler)ini buraya yaz
 
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
