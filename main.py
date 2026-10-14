@@ -319,6 +319,7 @@ for idx, firma in enumerate(firmalar, start=1):
             gemini.update({"sinif": "GEMINI_LIMITI", "gerekce": "Limit aşıldı."})
 
         if kural["marti_jenerik"]: durum = "ELENDI_JENERIK_BAGLAM"
+        elif gemini.get("cache"): durum = "CACHE_YUKLENDI"
         elif gemini["sinif"] == "OLUMLU_ADAY" and gemini.get("ilgili_firma", True) and gemini.get("olumsuz_olay", True): durum = "GEMINI_ADAY_INCELE"
         elif gemini["sinif"] == "ILGISIZ": durum = "GEMINI_ILGISIZ"
         elif gemini["sinif"] == "BELIRSIZ": durum = "GEMINI_BELIRSIZ"
