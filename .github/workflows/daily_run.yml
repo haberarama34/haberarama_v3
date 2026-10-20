@@ -22,17 +22,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pandas requests feedparser trafilatura beautifulsoup4 google-genai psycopg2-binary openpyxl
-
-      - name: Tarama ve Raporlama Scriptini Çalıştır
-        env:
-          # GitHub Secrets'tan alınacak değerler
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          GONDEREN_MAIL: ${{ secrets.GONDEREN_MAIL }}
-          GONDEREN_SIFRE: ${{ secrets.GONDEREN_SIFRE }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          ALICI_MAILLER : ${{secrets.ALICI_MAILLER}}
-        run: python main.py
       - name: İkinci Scripti Çalıştır
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
