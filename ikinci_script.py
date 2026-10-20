@@ -57,7 +57,7 @@ BEKLEME_SAYFA_SANIYE = 4.5
 HABER_GOVDESI_INDIR = True
 GOVDE_MAX_KARAKTER = 9000
 RSS_ACIKLAMA_MAX_KARAKTER = 5000
-EXCEL_DOSYASI = "Firmalar_ikinci.xlsx"
+EXCEL_DOSYASI = "Firmalar_Yeni.xlsx"
 
 # -------- 2. KELİME LİSTELERİ VE YARDIMCI FONKSİYONLAR --------
 anahtar_kelimeler = [
