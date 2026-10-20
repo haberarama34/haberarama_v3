@@ -1,0 +1,1 @@
+[![Günlük Kurumsal Haber Taramasi](https://github.com/haberarama34/haberarama_v3/actions/workflows/daily_run.yml/badge.svg)](https://github.com/haberarama34/haberarama_v3/actions/workflows/daily_run.yml)
