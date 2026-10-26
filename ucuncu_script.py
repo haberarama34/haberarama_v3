@@ -646,9 +646,16 @@ for row in pending_rows:
     key = (firma_unvan, normalize_url(url) or url)
     if key in queued_keys:
         continue
-    pending_haber = {"baslik": baslik or "", "url": url or "", "tarih": tarih or "", "tarih_iso": tarih_iso or "",
-                     "tarih_dogrulama_durumu": tarih_durum or "TARIH_BELIRSIZ", "rss_aciklama": rss or "",
-                     "govde": govde or "", "govde_durumu": govde_durumu or "ATLANDI"}
+    pending_haber = {
+    "baslik": baslik or "",
+    "url": url or "",
+    "tarih": tarih or "",
+    "tarih_iso": tarih_iso or "",
+    "tarih_dogrulama_durumu": tarih_durum or "TARIH_BELIRSIZ",
+    "rss_aciklama": rss or "",
+    "govde": govde or "",
+    "govde_durumu": govde_durum or "ATLANDI"
+}
     dt = haber_tarihini_coz(pending_haber["tarih_iso"] or pending_haber["tarih"])
     cutoff_pending = datetime.now(timezone.utc) - timedelta(days=HABER_GECMIS_GUN)
     if dt and dt < cutoff_pending:
